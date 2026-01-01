@@ -1,30 +1,23 @@
-const axios = require("axios");
-require("dotenv").config();
-
-async function getDiscordProfile(userId) {
-  const url = `https://discord.com/api/v10/users/${userId}/profile`;
-  const token = process.env.ACCOUNT_TOKEN;
-
+async function getUserProfile(userId) {
   try {
-    const response = await axios.get(url, {
+    const response = await fetch(`https://discord.com/api/v10/users/${userId}/profile`, {
+      method: 'GET',
       headers: {
-        Authorization: token,
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      },
+        'Authorization': process.env.ACCOUNT_TOKEN
+      }
     });
-    console.log(response.data);
-    if (response.data.user.bio === "") {
+
+    if (!response.ok) {
+      console.error(`Error fetching profile: ${response.status} ${response.statusText}`);
       return null;
     }
-    return response.data.user.bio;
+
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error(
-      "Erro ao buscar perfil do Discord:",
-      error.response?.data || error.message
-    );
+    console.error("API Request failed:", error);
     return null;
   }
 }
 
-module.exports = { getDiscordProfile };
+module.exports = { getUserProfile };
