@@ -79,13 +79,16 @@ client.on('interactionCreate', async interaction => {
         if (roleId) {
           await member.roles.add(roleId);
           await interaction.reply(createResponse('Você recebeu o cargo de Embaixador.'));
+          console.log(`Cargo de Embaixador concedido a ${member.user.tag}`);
         }
       } catch (err) {
         console.error("Erro ao dar cargo:", err);
         await interaction.reply(createResponse('Tag verificada, mas não consegui te dar o cargo.'));
+        console.log(`Tag verificada para ${member.user.tag}, mas falha ao conceder cargo.`);
       }
     } else {
       await interaction.reply(createResponse('Você não esta utilizando a tag do servidor no seu perfil. Adicione a tag e tente novamente.'));
+      console.log(`Usuário ${member.user.tag} não possui a tag do servidor. Verificação falhou.`);
     }
   }
 });

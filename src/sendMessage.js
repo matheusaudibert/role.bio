@@ -19,7 +19,23 @@ async function sendMessage(client) {
   if (!channel) return console.error("Channel not found");
 
   try {
-    await channel.bulkDelete(100, true);
+    let fetched;
+    do {
+      fetched = await channel.messages.fetch({ limit: 100 });
+
+      const recent = fetched.filter(m => Date.now() - m.createdTimestamp < 1209600000);
+      const oldMsgs = fetched.filter(m => Date.now() - m.createdTimestamp >= 1209600000);
+
+      if (recent.size > 1) {
+        await channel.bulkDelete(recent).catch(err => console.error("Bulk delete failed:", err));
+      } else if (recent.size === 1) {
+        await recent.first().delete().catch(err => console.error("Single delete failed:", err));
+      }
+
+      for (const [, msg] of oldMsgs) {
+        await msg.delete().catch(err => console.error("Old msg delete failed:", err));
+      }
+    } while (fetched.size >= 100);
   } catch (err) {
     console.error("Could not clear channel:", err);
   }
